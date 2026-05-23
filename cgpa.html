@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CGPA Calculator | AetherCore</title>
+    <style>
+        :root {
+            --bg: #080c10;
+            --accent: #4a90e2;
+            --surface: rgba(18, 24, 31, 0.7);
+            --text-p: #ffffff;
+            --text-s: #636e7b;
+            --danger: #e63946;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            background: linear-gradient(135deg, #080c10, #1a222a); 
+            color: var(--text-p); 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header { text-align: center; margin: 40px 0; }
+        .title { font-size: 28px; font-weight: 900; letter-spacing: -1px; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: var(--text-s); letter-spacing: 3px; text-transform: uppercase; }
+
+        .container { width: 100%; max-width: 400px; }
+        .card { 
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 28px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .sem-row { display: grid; grid-template-columns: 1fr 1fr 40px; gap: 10px; align-items: center; margin-bottom: 15px; }
+        input { 
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 12px; padding: 12px; color: white; width: 100%;
+        }
+        
+        .btn { 
+            background: var(--accent); color: white; border: none; padding: 15px; border-radius: 15px;
+            font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 10px; transition: 0.3s;
+        }
+        .btn-del { background: var(--danger); }
+        .btn:active { transform: scale(0.98); }
+
+        .result-panel { 
+            text-align: center; padding: 20px; border-radius: 20px;
+            background: rgba(74, 144, 226, 0.1); border: 1px solid var(--accent);
+        }
+        .res-val { font-size: 32px; font-weight: 800; color: var(--accent); }
+
+        footer { font-size: 8px; color: #313a43; letter-spacing: 2px; text-transform: uppercase; margin-top: auto; padding: 40px; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1 class="title">CGPA Calculator</h1>
+        <div class="subtitle">AetherCore Engineering Suite</div>
+    </header>
+
+    <div class="container">
+        <div id="sem-list"></div>
+        <button class="btn" onclick="addSemester()">+ ADD SEMESTER</button>
+        <button class="btn" style="background:transparent; border: 1px solid #313a43;" onclick="resetAll()">RESET</button>
+
+        <div class="card result-panel">
+            <div class="subtitle">Calculated CGPA</div>
+            <div class="res-val" id="cgpa-out">0.00</div>
+            <div style="font-size: 12px; color: var(--text-s);">Total Credits: <span id="cred-out">0</span></div>
+        </div>
+    </div>
+
+    <footer>AetherCore Interactive</footer>
+
+    <script>
+        let semesters = JSON.parse(localStorage.getItem('sems')) || [{sgpa: '', credits: ''}];
+
+        function render() {
+            const list = document.getElementById('sem-list');
+            list.innerHTML = '';
+            semesters.forEach((sem, index) => {
+                const div = document.createElement('div');
+                div.className = 'card sem-row';
+                div.innerHTML = `
+                    <input type="number" placeholder="SGPA" value="${sem.sgpa}" oninput="update(${index}, 'sgpa', this.value)">
+                    <input type="number" placeholder="Credits" value="${sem.credits}" oninput="update(${index}, 'credits', this.value)">
+                    <button class="btn btn-del" onclick="remove(${index})">×</button>
+                `;
+                list.appendChild(div);
+            });
+            calculate();
+        }
+
+        function update(i, field, val) {
+            semesters[i][field] = val;
+            localStorage.setItem('sems', JSON.stringify(semesters));
+            calculate();
+        }
+
+        function addSemester() {
+            semesters.push({sgpa: '', credits: ''});
+            render();
+        }
+
+        function remove(i) {
+            if(semesters.length > 1) {
+                semesters.splice(i, 1);
+                render();
+            }
+        }
+
+        function calculate() {
+            let totalWeighted = 0, totalCredits = 0;
+            semesters.forEach(s => {
+                let sgpa = parseFloat(s.sgpa), cred = parseFloat(s.credits);
+                if(sgpa >= 0 && sgpa <= 10 && cred > 0) {
+                    totalWeighted += (sgpa * cred);
+                    totalCredits += cred;
+                }
+            });
+            document.getElementById('cgpa-out').innerText = totalCredits ? (totalWeighted / totalCredits).toFixed(2) : '0.00';
+            document.getElementById('cred-out').innerText = totalCredits;
+        }
+
+        function resetAll() {
+            localStorage.clear();
+            semesters = [{sgpa: '', credits: ''}];
+            render();
+        }
+
+        render();
+    </script>
+</body>
+</html>
