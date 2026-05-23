@@ -2,90 +2,99 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>CGPA Calculator | AetherCore</title>
     <style>
         :root {
             --bg: #080c10;
             --accent: #4a90e2;
-            --surface: rgba(18, 24, 31, 0.7);
+            --surface: rgba(18, 24, 31, 0.6);
             --text-p: #ffffff;
             --text-s: #636e7b;
             --danger: #e63946;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body { 
-            background: linear-gradient(135deg, #080c10, #1a222a); 
+            background: radial-gradient(circle at top, #1a222a 0%, #080c10 100%); 
             color: var(--text-p); 
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
             min-height: 100vh;
-            padding: 20px;
+            padding: calc(env(safe-area-inset-top) + 40px) 20px 40px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        .header { text-align: center; margin: 40px 0; }
-        .title { font-size: 28px; font-weight: 900; letter-spacing: -1px; margin-bottom: 5px; }
-        .subtitle { font-size: 10px; color: var(--text-s); letter-spacing: 3px; text-transform: uppercase; }
+        .header { position: sticky; top: 0; text-align: center; margin-bottom: 30px; z-index: 100; }
+        .title { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; }
+        .subtitle { font-size: 9px; color: var(--text-s); letter-spacing: 3px; text-transform: uppercase; margin-top: 5px; }
 
         .container { width: 100%; max-width: 400px; }
+        
         .card { 
             background: var(--surface);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255,255,255,0.05);
             border-radius: 28px;
-            padding: 25px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: fadeIn 0.4s ease;
         }
 
-        .sem-row { display: grid; grid-template-columns: 1fr 1fr 40px; gap: 10px; align-items: center; margin-bottom: 15px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .sem-row { display: grid; grid-template-columns: 40px 1fr 1fr 40px; gap: 8px; align-items: center; }
+        .sem-num { font-size: 10px; font-weight: 800; color: var(--text-s); }
+        
         input { 
-            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); 
-            border-radius: 12px; padding: 12px; color: white; width: 100%;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); 
+            border-radius: 12px; padding: 12px 10px; color: white; text-align: center; font-size: 14px;
         }
         
         .btn { 
-            background: var(--accent); color: white; border: none; padding: 15px; border-radius: 15px;
-            font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 10px; transition: 0.3s;
+            background: var(--accent); color: white; border: none; padding: 15px; border-radius: 18px;
+            font-weight: 700; cursor: pointer; width: 100%; margin-top: 5px; transition: 0.3s;
         }
-        .btn-del { background: var(--danger); }
-        .btn:active { transform: scale(0.98); }
+        .btn-del { background: rgba(230, 57, 70, 0.1); color: var(--danger); font-size: 18px; }
+        .btn:active { transform: scale(0.97); }
 
-        .result-panel { 
-            text-align: center; padding: 20px; border-radius: 20px;
-            background: rgba(74, 144, 226, 0.1); border: 1px solid var(--accent);
+        .result-card { 
+            background: linear-gradient(165deg, rgba(74, 144, 226, 0.15), transparent);
+            text-align: center; padding: 30px; border: 1px solid var(--accent);
         }
-        .res-val { font-size: 32px; font-weight: 800; color: var(--accent); }
+        .res-val { font-size: 42px; font-weight: 900; color: var(--accent); }
 
-        footer { font-size: 8px; color: #313a43; letter-spacing: 2px; text-transform: uppercase; margin-top: auto; padding: 40px; }
+        footer { font-size: 8px; color: #1e242b; letter-spacing: 3px; text-transform: uppercase; margin-top: 40px; font-weight: 700; }
     </style>
 </head>
 <body>
 
     <header class="header">
-        <h1 class="title">CGPA Calculator</h1>
+        <h1 class="title">Anna University CGPA Calculator</h1>
         <div class="subtitle">AetherCore Engineering Suite</div>
     </header>
 
     <div class="container">
         <div id="sem-list"></div>
+        
         <button class="btn" onclick="addSemester()">+ ADD SEMESTER</button>
-        <button class="btn" style="background:transparent; border: 1px solid #313a43;" onclick="resetAll()">RESET</button>
+        <button class="btn" style="background:transparent; border:1px solid #1e242b;" onclick="resetAll()">RESET DATA</button>
 
-        <div class="card result-panel">
-            <div class="subtitle">Calculated CGPA</div>
+        <div class="card result-card">
+            <div class="subtitle" style="margin-bottom:10px;">Calculated CGPA</div>
             <div class="res-val" id="cgpa-out">0.00</div>
-            <div style="font-size: 12px; color: var(--text-s);">Total Credits: <span id="cred-out">0</span></div>
+            <div style="font-size: 12px; color: var(--text-s); margin-top: 5px;">Total Credits: <span id="cred-out">0</span></div>
         </div>
     </div>
 
     <footer>AetherCore Interactive</footer>
 
     <script>
-        let semesters = JSON.parse(localStorage.getItem('sems')) || [{sgpa: '', credits: ''}];
+        // Load data from localStorage
+        let semesters = JSON.parse(localStorage.getItem('aether_cgpa')) || [{sgpa: '', credits: ''}];
 
         function render() {
             const list = document.getElementById('sem-list');
@@ -94,8 +103,9 @@
                 const div = document.createElement('div');
                 div.className = 'card sem-row';
                 div.innerHTML = `
+                    <div class="sem-num">S${index + 1}</div>
                     <input type="number" placeholder="SGPA" value="${sem.sgpa}" oninput="update(${index}, 'sgpa', this.value)">
-                    <input type="number" placeholder="Credits" value="${sem.credits}" oninput="update(${index}, 'credits', this.value)">
+                    <input type="number" placeholder="CR" value="${sem.credits}" oninput="update(${index}, 'credits', this.value)">
                     <button class="btn btn-del" onclick="remove(${index})">×</button>
                 `;
                 list.appendChild(div);
@@ -104,8 +114,13 @@
         }
 
         function update(i, field, val) {
+            // Basic validation
+            let num = parseFloat(val);
+            if (field === 'sgpa' && (num < 0 || num > 10)) return;
+            if (field === 'credits' && num < 0) return;
+            
             semesters[i][field] = val;
-            localStorage.setItem('sems', JSON.stringify(semesters));
+            localStorage.setItem('aether_cgpa', JSON.stringify(semesters));
             calculate();
         }
 
@@ -125,7 +140,7 @@
             let totalWeighted = 0, totalCredits = 0;
             semesters.forEach(s => {
                 let sgpa = parseFloat(s.sgpa), cred = parseFloat(s.credits);
-                if(sgpa >= 0 && sgpa <= 10 && cred > 0) {
+                if(!isNaN(sgpa) && !isNaN(cred) && cred > 0) {
                     totalWeighted += (sgpa * cred);
                     totalCredits += cred;
                 }
@@ -135,9 +150,11 @@
         }
 
         function resetAll() {
-            localStorage.clear();
-            semesters = [{sgpa: '', credits: ''}];
-            render();
+            if(confirm('Clear all saved data?')) {
+                localStorage.removeItem('aether_cgpa');
+                semesters = [{sgpa: '', credits: ''}];
+                render();
+            }
         }
 
         render();
