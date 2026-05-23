@@ -22,7 +22,24 @@
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
         }
 
-        header { padding: 20px 20px 10px; font-weight: 800; font-size: 10px; letter-spacing: 0.2em; color: var(--text-dim); }
+        /* Architectural Header Styling */
+        header { 
+            padding: 32px 20px 20px; 
+            text-align: center;
+        }
+        .title-brand {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .title-sub {
+            font-size: 10px;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+        }
         
         #canvas { flex: 1; overflow-y: auto; padding: 0 20px; }
         
@@ -47,7 +64,10 @@
 </head>
 <body oncontextmenu="return false;">
 
-    <header>ACADEMIC ENGINE v2026</header>
+    <header>
+        <div class="title-brand">AETHERCORE</div>
+        <div class="title-sub">Academic Engine 2026</div>
+    </header>
     
     <div id="canvas">
         <div class="entry-row" style="margin-bottom: 4px;">
@@ -74,9 +94,7 @@
         const GRADE_MAP = { 'O': 10, 'A+': 9, 'A': 8, 'B+': 7, 'B': 6, 'C': 5, 'RA': 0 };
         let stack = JSON.parse(localStorage.getItem('au_core')) || [{name: '', grade: 'O', cr: ''}];
 
-        window.alert = function() {};
-        window.confirm = function() { return false; };
-        window.prompt = function() { return null; };
+        window.alert = function() {}; window.confirm = function() { return false; }; window.prompt = function() { return null; };
 
         function render() {
             const container = document.getElementById('row-container');
