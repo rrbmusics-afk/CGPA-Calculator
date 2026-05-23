@@ -9,7 +9,13 @@
             --bg: #000000; --ui: #121212; --text: #FFFFFF; --text-dim: #666666; 
             --accent: #0A84FF; --err: #FF453A;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            -webkit-user-select: none; 
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
         body { 
             margin: 0; background: var(--bg); color: var(--text); height: 100dvh; 
             display: flex; flex-direction: column; overflow: hidden; font-feature-settings: "tnum";
@@ -26,6 +32,7 @@
         input, select { 
             background: var(--ui); border: 1px solid #222; color: white; padding: 12px 8px; 
             border-radius: 8px; font-size: 13px; font-weight: 500; width: 100%;
+            outline: none;
         }
         
         .footer { background: #0a0a0a; border-top: 1px solid #1a1a1a; padding: 20px; }
@@ -38,7 +45,7 @@
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
     <header>ACADEMIC ENGINE v2026</header>
     
@@ -67,7 +74,6 @@
         const GRADE_MAP = { 'O': 10, 'A+': 9, 'A': 8, 'B+': 7, 'B': 6, 'C': 5, 'RA': 0 };
         let stack = JSON.parse(localStorage.getItem('au_core')) || [{name: '', grade: 'O', cr: ''}];
 
-        // Disable system alerts and popups
         window.alert = function() {};
         window.confirm = function() { return false; };
         window.prompt = function() { return null; };
