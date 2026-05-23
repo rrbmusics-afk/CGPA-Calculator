@@ -12,7 +12,7 @@
         .header { flex: 0 0 auto; text-align: center; padding: 5px 0; }
         #list { flex: 1 1 auto; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
         
-        .row { display: grid; grid-template-columns: 30px 1fr 1fr 35px; gap: 8px; align-items: center; background: var(--card); padding: 10px; border-radius: 12px; transition: opacity 0.2s; }
+        .row { display: grid; grid-template-columns: 30px 1fr 1fr 35px; gap: 8px; align-items: center; background: var(--card); padding: 10px; border-radius: 12px; }
         input { background: #2C2C2E; border: 1px solid #333; border-radius: 8px; padding: 10px; color: white; text-align: center; font-size: 14px; width: 100%; }
         
         .bottom-panel { flex: 0 0 auto; background: var(--bg); border-top: 1px solid #333; padding-top: 10px; }
@@ -33,22 +33,21 @@
             <div style="text-align:right;"><small style="color:#666">TOTAL CREDITS</small><div id="credits" style="font-weight:800; font-size:20px;">0</div></div>
         </div>
         <div class="btn-group">
-            <button class="btn-add" onclick="add()">+ ADD SEM</button>
+            <button class="btn-add" onclick="add()">+ ADD SUBJECT</button>
             <button class="btn-res" onclick="reset()">RESET</button>
         </div>
     </div>
 
     <script>
-        let data = JSON.parse(localStorage.getItem('au_data')) || [{sgpa: '', cr: ''}];
+        let data = JSON.parse(localStorage.getItem('au_data')) || [{gp: '', cr: ''}];
         const list = document.getElementById('list');
 
         function createRow(index) {
             const div = document.createElement('div');
             div.className = 'row';
-            div.id = 'row-' + index;
             div.innerHTML = `
-                <div style="font-size:10px; color:#888;">S${index + 1}</div>
-                <input type="number" inputmode="decimal" placeholder="SGPA" value="${data[index].sgpa}" oninput="update(${index}, 'sgpa', this.value)">
+                <div style="font-size:10px; color:#888;">#${index + 1}</div>
+                <input type="number" inputmode="decimal" placeholder="GP (0-10)" value="${data[index].gp}" oninput="update(${index}, 'gp', this.value)">
                 <input type="number" inputmode="decimal" placeholder="CR" value="${data[index].cr}" oninput="update(${index}, 'cr', this.value)">
                 <div onclick="del(${index})" style="color:#ff3b30; text-align:center; font-weight:bold;">✕</div>
             `;
@@ -61,35 +60,17 @@
             calc();
         }
 
-        function update(i, f, v) { 
-            data[i][f] = v; 
-            localStorage.setItem('au_data', JSON.stringify(data)); 
-            calc(); 
-        }
-
+        function update(i, f, v) { data[i][f] = v; localStorage.setItem('au_data', JSON.stringify(data)); calc(); }
         function calc() {
             let p = 0, c = 0;
-            data.forEach(s => { let sg = parseFloat(s.sgpa), cr = parseFloat(s.cr); if(!isNaN(sg) && !isNaN(cr)) { p += (sg * cr); c += cr; } });
+            data.forEach(s => { let gp = parseFloat(s.gp), cr = parseFloat(s.cr); if(!isNaN(gp) && !isNaN(cr)) { p += (gp * cr); c += cr; } });
             document.getElementById('cgpa').innerText = c ? (p/c).toFixed(2) : '0.00';
             document.getElementById('credits').innerText = c;
         }
-
-        function add() { 
-            data.push({sgpa: '', cr: ''}); 
-            list.appendChild(createRow(data.length - 1));
-            calc();
-        }
-
-        function del(i) { 
-            if(data.length > 1) { 
-                data.splice(i, 1); 
-                refreshAll(); // Only refresh if items are removed to maintain correct index tracking
-            } 
-        }
-
-        function reset() { localStorage.clear(); data = [{sgpa: '', cr: ''}]; refreshAll(); }
+        function add() { data.push({gp: '', cr: ''}); list.appendChild(createRow(data.length - 1)); calc(); }
+        function del(i) { data.splice(i, 1); refreshAll(); }
+        function reset() { localStorage.clear(); data = [{gp: '', cr: ''}]; refreshAll(); }
         
-        // Initial setup
         data.forEach((_, i) => list.appendChild(createRow(i)));
         calc();
     </script>
