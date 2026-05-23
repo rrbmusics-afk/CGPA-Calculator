@@ -47,7 +47,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .sem-row { display: grid; grid-template-columns: 40px 1fr 1fr 40px; gap: 8px; align-items: center; }
-        .sem-num { font-size: 10px; font-weight: 800; color: var(--text-s); }
+        .sem-num { font-size: 10px; font-weight: 800; color: var(--text-s); text-align: center; }
         
         input { 
             background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); 
@@ -58,7 +58,7 @@
             background: var(--accent); color: white; border: none; padding: 15px; border-radius: 18px;
             font-weight: 700; cursor: pointer; width: 100%; margin-top: 5px; transition: 0.3s;
         }
-        .btn-del { background: rgba(230, 57, 70, 0.1); color: var(--danger); font-size: 18px; }
+        .btn-del { background: rgba(230, 57, 70, 0.1); color: var(--danger); font-size: 18px; border-radius: 12px; }
         .btn:active { transform: scale(0.97); }
 
         .result-card { 
@@ -114,7 +114,6 @@
         }
 
         function update(i, field, val) {
-            // Basic validation
             let num = parseFloat(val);
             if (field === 'sgpa' && (num < 0 || num > 10)) return;
             if (field === 'credits' && num < 0) return;
