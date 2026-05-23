@@ -5,63 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>AetherCore | Academic Engine</title>
     <style>
-        /* 
-           Architectural Typography Stack:
-           - Uses tabular-nums for stable UI metrics.
-           - SF Pro/Inter ensures high legibility.
-        */
         :root { 
-            --bg: #000000; 
-            --ui: #121212; 
-            --text: #FFFFFF; 
-            --text-dim: #888888;
-            --accent: #0A84FF; 
-            --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+            --bg: #000000; --ui: #121212; --text: #FFFFFF; --text-dim: #666666; 
+            --accent: #0A84FF; --err: #FF453A;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            margin: 0; background: var(--bg); color: var(--text); height: 100dvh; 
+            display: flex; flex-direction: column; overflow: hidden; font-feature-settings: "tnum";
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body { 
-            margin: 0; background: var(--bg); color: var(--text); 
-            font-family: var(--font-main); height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
-            font-feature-settings: "tnum" on, "lnum" on; /* Tabular Numerals for stable UI */
-        }
-        
-        .header { 
-            padding: 24px 20px 12px; font-weight: 800; font-size: 11px; 
-            letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim);
-        }
+        header { padding: 20px 20px 10px; font-weight: 800; font-size: 10px; letter-spacing: 0.2em; color: var(--text-dim); }
         
         #canvas { flex: 1; overflow-y: auto; padding: 0 20px; }
         
-        .entry-row { 
-            display: grid; grid-template-columns: 1fr 1fr 30px; gap: 12px; margin-bottom: 12px; align-items: center; 
-        }
+        .entry-row { display: grid; grid-template-columns: 2fr 1fr 1fr 30px; gap: 8px; margin-bottom: 8px; align-items: center; }
+        .label { font-size: 8px; color: var(--text-dim); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
         
-        select, input { 
-            background: var(--ui); border: 1px solid #222; color: white; padding: 14px; 
-            border-radius: 12px; font-size: 15px; font-weight: 500; appearance: none;
+        input, select { 
+            background: var(--ui); border: 1px solid #222; color: white; padding: 12px 8px; 
+            border-radius: 8px; font-size: 13px; font-weight: 500; width: 100%;
         }
         
         .footer { background: #0a0a0a; border-top: 1px solid #1a1a1a; padding: 20px; }
         .metrics { display: flex; justify-content: space-between; margin-bottom: 20px; }
-        .val { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; }
+        .val { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
         
         button { 
-            background: var(--accent); color: white; border: none; padding: 16px; 
-            border-radius: 14px; font-weight: 600; font-size: 14px; letter-spacing: -0.01em; cursor: pointer;
+            background: var(--accent); color: white; border: none; padding: 14px; 
+            border-radius: 10px; font-weight: 600; font-size: 13px; cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">ANNA UNIVERSITY ACADEMIC ENGINE</div>
-    <div id="canvas"></div>
+    <header>ACADEMIC ENGINE v2026</header>
+    
+    <div id="canvas">
+        <div class="entry-row" style="margin-bottom: 4px;">
+            <div class="label">Subject Name</div>
+            <div class="label">Grade</div>
+            <div class="label">Cr</div>
+            <div></div>
+        </div>
+        <div id="row-container"></div>
+    </div>
 
     <div class="footer">
         <div class="metrics">
-            <div><div style="color:var(--text-dim); font-size:10px; text-transform:uppercase; letter-spacing:0.1em;">CGPA</div><div id="cgpa" class="val">0.00</div></div>
-            <div style="text-align:right;"><div style="color:var(--text-dim); font-size:10px; text-transform:uppercase; letter-spacing:0.1em;">TOTAL CREDITS</div><div id="cr-tot" class="val">0</div></div>
+            <div><div style="color:var(--text-dim); font-size:9px; text-transform:uppercase;">CGPA</div><div id="cgpa" class="val">0.00</div></div>
+            <div style="text-align:right;"><div style="color:var(--text-dim); font-size:9px; text-transform:uppercase;">Total Credits</div><div id="cr-tot" class="val">0</div></div>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <button onclick="addEntry()">ADD SUBJECT</button>
@@ -71,22 +65,23 @@
 
     <script>
         const GRADE_MAP = { 'O': 10, 'A+': 9, 'A': 8, 'B+': 7, 'B': 6, 'C': 5, 'RA': 0 };
-        let stack = JSON.parse(localStorage.getItem('au_core')) || [];
+        let stack = JSON.parse(localStorage.getItem('au_core')) || [{name: '', grade: 'O', cr: ''}];
 
         function render() {
-            const canvas = document.getElementById('canvas');
-            canvas.innerHTML = '';
+            const container = document.getElementById('row-container');
+            container.innerHTML = '';
             stack.forEach((item, i) => {
                 const row = document.createElement('div');
                 row.className = 'entry-row';
                 row.innerHTML = `
+                    <input type="text" placeholder="Name" value="${item.name}" oninput="update(${i}, 'name', this.value)">
                     <select onchange="update(${i}, 'grade', this.value)">
                         ${Object.keys(GRADE_MAP).map(g => `<option value="${g}" ${item.grade===g?'selected':''}>${g}</option>`).join('')}
                     </select>
-                    <input type="number" placeholder="Credits" value="${item.cr}" oninput="update(${i}, 'cr', this.value)">
+                    <input type="number" placeholder="0" value="${item.cr}" oninput="update(${i}, 'cr', this.value)">
                     <div style="color:#444; text-align:center; cursor:pointer;" onclick="del(${i})">✕</div>
                 `;
-                canvas.appendChild(row);
+                container.appendChild(row);
             });
             compute();
         }
@@ -98,9 +93,10 @@
             document.getElementById('cgpa').innerText = crs ? (pts/crs).toFixed(2) : '0.00';
             document.getElementById('cr-tot').innerText = crs;
         }
-        function addEntry() { stack.push({grade: 'O', cr: ''}); render(); }
-        function del(i) { stack.splice(i, 1); render(); }
-        function reset() { stack = []; localStorage.clear(); render(); }
+        function addEntry() { stack.push({name: '', grade: 'O', cr: ''}); render(); }
+        function del(i) { if(stack.length > 1) { stack.splice(i, 1); render(); } }
+        function reset() { stack = [{name: '', grade: 'O', cr: ''}]; localStorage.clear(); render(); }
+        
         render();
     </script>
 </body>
